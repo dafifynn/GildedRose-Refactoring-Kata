@@ -7,77 +7,84 @@ defmodule GildedRose do
     Enum.map(items, &update_item/1)
   end
 
+  def update_item(%Item{name: "Aged Brie", sell_in: sell_in, quality: quality} = item)
+      when 50 > quality do
+    %{item | quality: quality + 1, sell_in: sell_in - 1}
+  end
+
+  def update_item(%Item{name: "Sulfuras, Hand of Ragnaros"} = item) do
+    item
+  end
+
+  def update_item(
+        %Item{name: "Backstage passes to a TAFKAL80ETC concert", sell_in: sell_in} = item
+      )
+      when sell_in == 0 do
+    %{item | quality: 0, sell_in: sell_in - 1}
+  end
+
+  def update_item(
+        %Item{
+          name: "Backstage passes to a TAFKAL80ETC concert",
+          sell_in: sell_in,
+          quality: quality
+        } = item
+      )
+      when 5 >= sell_in and sell_in > 0 do
+    %{item | quality: min(quality + 3, 50), sell_in: sell_in - 1}
+  end
+
+  def update_item(
+        %Item{
+          name: "Backstage passes to a TAFKAL80ETC concert",
+          sell_in: sell_in,
+          quality: quality
+        } = item
+      )
+      when 10 >= sell_in and sell_in > 5 do
+    %{item | quality: min(quality + 2, 50), sell_in: sell_in - 1}
+  end
+
+  def update_item(
+        %Item{
+          name: "Backstage passes to a TAFKAL80ETC concert",
+          sell_in: sell_in,
+          quality: quality
+        } = item
+      )
+      when sell_in > 10 do
+    %{item | quality: min(quality + 1, 50), sell_in: sell_in - 1}
+  end
+
+  def update_item(%Item{name: "Conjured", sell_in: sell_in, quality: quality} = item) when quality > 0 and sell_in > 0 do
+    if (quality - 2 ) >= 0 do
+      %{item | quality: quality - 2, sell_in: sell_in - 1}
+    else
+      %{item | quality: 0, sell_in: sell_in - 1}
+    end
+  end
+
+  def update_item(%Item{name: "Conjured", quality: quality} = item) when quality > 0 do
+    if (quality - 4 ) >= 0 do
+      %{item | quality: quality - 4, sell_in: item.sell_in - 1}
+    else
+      %{item | quality: 0, sell_in: item.sell_in - 1}
+    end
+  end
+
+  def update_item(%Item{name: name, sell_in: sell_in, quality: quality} = item)
+      when quality > 0 and sell_in >= 0 and
+             name not in ["Aged Brie", "Backstage passes to a TAFKAL80ETC concert", "conjured"] do
+    %{item | quality: quality - 1, sell_in: item.sell_in - 1}
+  end
+
+  def update_item(%Item{name: name, sell_in: sell_in, quality: quality} = item)
+      when quality > 0 and 0 > sell_in and
+             name not in ["Aged Brie", "Backstage passes to a TAFKAL80ETC concert", "conjured"] do
+    %{item | quality: quality - 2, sell_in: item.sell_in - 1}
+  end
+
   def update_item(item) do
-    item = cond do
-      item.name != "Aged Brie" && item.name != "Backstage passes to a TAFKAL80ETC concert" ->
-        if item.quality > 0 do
-          if item.name != "Sulfuras, Hand of Ragnaros" do
-            %{item | quality: item.quality - 1}
-          else
-            item
-          end
-        else
-          item
-        end
-      true ->
-        cond do
-          item.quality < 50 ->
-            item = %{item | quality: item.quality + 1}
-            cond do
-              item.name == "Backstage passes to a TAFKAL80ETC concert" ->
-                item = cond do
-                  item.sell_in < 11 ->
-                    cond do
-                      item.quality < 50 ->
-                        %{item | quality: item.quality + 1}
-                      true -> item
-                    end
-                  true -> item
-                end
-                cond do
-                  item.sell_in < 6 ->
-                    cond do
-                      item.quality < 50 ->
-                        %{item | quality: item.quality + 1}
-                      true -> item
-                    end
-                  true -> item
-                end
-              true -> item
-            end
-          true -> item
-        end
-    end
-    item = cond do
-      item.name != "Sulfuras, Hand of Ragnaros" ->
-        %{item | sell_in: item.sell_in - 1}
-      true -> item
-    end
-    cond do
-      item.sell_in < 0 ->
-        cond do
-          item.name != "Aged Brie" ->
-            cond do
-              item.name != "Backstage passes to a TAFKAL80ETC concert" ->
-                cond do
-                  item.quality > 0 ->
-                    cond do
-                      item.name != "Sulfuras, Hand of Ragnaros" ->
-                        %{item | quality: item.quality - 1}
-                      true -> item
-                    end
-                  true -> item
-                end
-              true -> %{item | quality: item.quality - item.quality}
-            end
-          true ->
-            cond do
-              item.quality < 50 ->
-                %{item | quality: item.quality + 1}
-              true -> item
-            end
-        end
-      true -> item
-    end
+    %{item | sell_in: item.sell_in - 1}
   end
 end
